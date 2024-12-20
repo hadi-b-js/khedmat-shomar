@@ -1,0 +1,51 @@
+html {
+	height: 95%;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	background-color: #152614;
+}
+
+body {
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
+}
+
+table {
+	font-family: helvetica;
+	font-weight: bold;
+	font-size: 1.3em;
+	border: 2px solid #fff;
+	padding: 10px;
+	margin: 20px 0;
+	border-radius: 20px;
+}
+
+td {
+	color: #f80;
+	margin: 0;
+	padding: 0;
+}
+
+td:first-child {
+	color: #2bf;
+}
+
+.bar {
+	width: 260px;
+	height: 20px;
+	background-color: white;
+	display: flex;
+	flex-flow: row nowrap;
+	border-radius: 5px;
+}
+
+.bar-estimated {
+	background-color: #0c0;
+	height: 100%;
+	text-align: center;
+	border-radius: 5px;
+}
