@@ -1,72 +1,86 @@
-﻿let start = new Date("2024/02/20");
-let end = new Date("2025/11/23");
-let tahlif = new Date("2024/05/05");
-let taghsim = new Date("2024/05/29");
-let taghsim2 = new Date("2024/12/14")
-
-const counterRuz = function () {
-  let ruzbarg = 0;
-  for (let i = new Date(); i <= end; i.setTime(i.getTime() + 86400000)) {
-    if (i.getDay() === 5 || i.getDay() === 4) {
-      continue;
-    } else {
-      ruzbarg += 1;
-    }
-  }
-  return ruzbarg;
+﻿const DATES = {
+  start: new Date("2024/02/20"),
+  end: new Date("2025/11/22"),
+  payanDore: new Date("2025/09/23"),
+  tahlif: new Date("2024/05/05"),
+  taghsim: new Date("2024/05/29"),
+  taghsim2: new Date("2024/12/14"),
 };
 
-const counter = function () {
-  let today = new Date();
-  let total = (end - start) / 1000 / 60 / 60 / 24;
-  let estimated = (today - start) / 1000 / 60 / 60 / 24;
-  let remained = (end - today) / 1000 / 60 / 60 / 24;
-  let yegan = (today - tahlif) / 1000 / 60 / 60 / 24;
-  let pasdari = (taghsim - tahlif) / 1000 / 60 / 60 / 24;
-  let monshi = (taghsim2 - taghsim) / 1000 / 60 / 60 / 24;
-  let paya = (today - taghsim2) / 1000 / 60 / 60 / 24;
-  let percent = (estimated * 100) / total;
+function countWorkingDays(from, to) {
+  let count = 0;
+  let current = new Date(from);
+  while (current <= to) {
+    const day = current.getDay();
+    if (day !== 4 && day !== 5) count++;
+    current.setDate(current.getDate() + 1);
+  }
+  return count;
+}
 
-  let contentObject = {
+function daysBetween(a, b) {
+  const MS_PER_DAY = 86400000;
+  return (b - a) / MS_PER_DAY;
+}
+
+function updateCounter() {
+  const today = new Date();
+  const { start, end, payanDore, tahlif, taghsim, taghsim2 } = DATES;
+
+  const totalDays = daysBetween(start, end);
+  const elapsedDays = daysBetween(start, today);
+  const remainingDays = daysBetween(today, end);
+  const remainingToPayan = daysBetween(today, payanDore);
+
+  const percent = (elapsedDays * 100) / totalDays;
+  const percent2 = 100 - (remainingToPayan * 100) / totalDays;
+
+  const content = {
     ezam: start.toLocaleDateString("fa-ir"),
     emruz: today.toLocaleDateString("fa-ir"),
+    payanDore: payanDore.toLocaleDateString("fa-ir"),
     etmam: end.toLocaleDateString("fa-ir"),
-    kol: `${total} ruz`,
-    gozashte: `${estimated.toFixed(5)} ruz`,
-    mande: `${remained.toFixed(5)} ruz`,
-    ruzbarg: `${counterRuz()} ruz`,
-    yegan: `${yegan.toFixed()} ruz`,
-    pasdari:`${pasdari.toFixed()} ruz`,
-    monshi: `${monshi.toFixed()} ruz`,
-    paya: `${paya.toFixed()} ruz`,
-    darsad: `${percent.toFixed(5)} %`,
+    kol: `${totalDays.toFixed(0)} ruz`,
+    gozashte: `${elapsedDays.toFixed(6)} ruz`,
+    mande: `${remainingDays.toFixed(6)} ruz`,
+    ruzbarg: `${countWorkingDays(today, end)} ruz`,
+    darsad: `${percent.toFixed(2)} %`,
+    payanDore2: `${remainingToPayan.toFixed(6)} ruz`,
+    ruzbarg2: `${countWorkingDays(today, payanDore)} ruz`,
+    darsad2: `${percent2.toFixed(2)} %`,
+    yegan: `${daysBetween(tahlif, today).toFixed(0)} ruz`,
+    pasdari: `${daysBetween(tahlif, taghsim).toFixed(0)} ruz`,
+    monshi: `${daysBetween(taghsim, taghsim2).toFixed(0)} ruz`,
+    paya: `${daysBetween(taghsim2, today).toFixed(0)} ruz`,
   };
 
-  let element = document.querySelector("table tbody");
-  element.innerHTML = "";
-  for (i in contentObject) {
-    element.innerHTML += `
-			<tr>
-				<td>
-					${i}
-				</td>
-				<td>
-					:
-				</td>
-				<td>
-					${contentObject[i]}
-				</td>
-			</tr>
-		`;
-  }
+  const tbody = document.querySelector("table tbody");
+  tbody.innerHTML = Object.entries(content)
+    .map(
+      ([key, value]) => `
+      <tr>
+        <td>${key}</td>
+        <td>:</td>
+        <td>${value}</td>
+      </tr>
+    `
+    )
+    .join("");
 
-  let estimatedBar = document.querySelector(".bar-estimated");
+  const estimatedBar = document.querySelector(".bar-estimated");
   estimatedBar.style.width = `${percent}%`;
   estimatedBar.innerText = `${percent.toFixed(1)}%`;
-};
 
-let element = document.createElement("table");
-element.append(document.createElement("tbody"));
-document.body.prepend(element);
+  const estimatedBar2 = document.querySelector(".bar-estimated2");
+  estimatedBar2.style.width = `${percent2}%`;
+  estimatedBar2.innerText = `${percent2.toFixed(1)}%`;
+}
 
-setInterval(counter, 1000);
+// Setup table only once
+(function setupTable() {
+  const table = document.createElement("table");
+  table.append(document.createElement("tbody"));
+  document.body.prepend(table);
+})();
+
+setInterval(updateCounter, 1000);
